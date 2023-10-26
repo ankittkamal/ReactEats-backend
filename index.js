@@ -6,7 +6,9 @@ const app = express();
 const port = process.env.PORT || 9000;
 app.use(cors());
 
+// To get restaurant list
 app.get("/api/restaurants", (req, res) => {
+  /* NEW SWIGGY API URL */
   const url =
     "https://www.swiggy.com/dapi/restaurants/list/v5?lat=28.6304203&lng=77.21772159999999&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING";
 
@@ -34,15 +36,12 @@ app.get("/api/restaurants", (req, res) => {
     });
 });
 
-app.get("/api/menu", (req, res) => {
-  const { restaurantId } = req.query;
-  console.log(req.query);
+// To get restaurant menu
+app.get("/api/restaurants/:resid", (req, res) => {
+  const { resid } = req.params; // Retrieve the 'resid' from the URL parameter
 
-  /* OLD SWIGGY API
-  const url = `https://www.swiggy.com/dapi/menu/v4/full?lat=${lat}&lng=${lng}&menuId=${menuId}`;
-  */
-
-  const url = `https://www.swiggy.com/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=28.6304203&lng=77.21772159999999&restaurantId=${restaurantId}`;
+  /* NEW SWIGGY API */
+  const url = `https://www.swiggy.com/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=28.6304203&lng=77.21772159999999&restaurantId=${resid}`;
 
   fetch(url, {
     headers: {
@@ -68,7 +67,7 @@ app.get("/api/menu", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.json({ test: "hello reactEats lovers !!! " });
+  res.json({ test: "Namaste Developer || ReactEats 🥳 !!! " });
 });
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
