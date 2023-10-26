@@ -60,7 +60,39 @@ npm install express cors cross-fetch
 - **cors** is a package that allows you to enable CORS with various options.
 - **cross-fetch** is a lightweight package that allows us to make HTTP requests It provides a polyfill for the Fetch API in Node.js.
 
-## Step 4: Create our server
+## Step 4: add vercel.json and edit package.json
+
+Add these inside your package.json
+
+```
+"main": "index.js",
+  "engines": {
+    "node": "18.x"
+  },
+```
+
+Add this inside your verson.json
+
+```
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "./index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ]
+}
+
+```
+
+## Step 5: Create our server
 
 Create a new file in our project directory called `index.js`. This file will contain the code for our server.
 

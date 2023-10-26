@@ -2,6 +2,10 @@
 
 A simple node.js web server that fetches data from a third-party (Swiggy) API and exposes it to a client (ReactEats) app.
 
+### Original code by [@Harshitha]
+
+https://github.com/HarshithaSolai/instafood-server
+
 ## Table of contents:
 
 - [API Endpoints](#api-endpoints)
@@ -118,6 +122,17 @@ To deploy our Node.js app on vercel.com, you can follow these steps:
 5. Set the `Environment Variables` and add `PORT` environment variables to `3000`.
 6. Wait for the deployment to finish. Once it's done, you should see a success message and a link to our server url.
 7. Click on the link url to test our server.
+
+### Modification and Improvement
+
+Original code by [@Harshitha] was initially deployed on render.com, but I found that the time taken to fetch data from render.com exceeded 2-3 minutes, impacting performance. In an effort to improve the application's speed and efficiency, I made the following changes:
+
+1. Hosted the Node.js server on Vercel, which resulted in significantly faster response times.
+2. Modified the fetch endpoints to use a new Swiggy API menu `api/restaurants/resId`, enhancing the data source and overall functionality of the application.
+
+These modifications were made with the intention of optimizing the application's performance and user experience.
+
+Code Repository by @Harshitha https://github.com/HarshithaSolai/instafood-server
 
 ### Contribute to this repository
 
