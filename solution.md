@@ -6,7 +6,7 @@ In this document, we will see how to use Node.js to create a server that can mak
 
 ## Problem Statement
 
-When making an API request from a `Instafood` `ReactEats` - a hobby react application for online food delivery, to a `Swiggy API` endpoint, the browser is throwing a `CORS` error, which is preventing the application from accessing the data it needs. This CORS error is occurring because the Swiggy API server is **not configured** to allow `cross-origin` requests from the domain where the React application is hosted. As a result, the React application is unable to retrieve the data it needs from the Swiggy API.
+When making an API request from a `ReactEats` (a react webapp https://react-eats.vercel.app ), to a `Swiggy API` endpoint, the browser is throwing a `CORS` error, which is preventing the application from accessing the data it needs. This CORS error is occurring because the Swiggy API server is **not configured** to allow `cross-origin` requests from the domain where the React application is hosted. As a result, the React application is unable to retrieve the data it needs from the Swiggy API.
 
 Usually when the server is also accessible by us, the problem could be fixed by setting appropriate headers to allows the domain in which our application is running. But, in our case, the Swiggy API is a third-party API, which means that we do not have control over its server configuration. Therefore, we need to find a way to work around the CORS error and retrieve the data from the Swiggy API so that the React application can function properly.
 
@@ -62,7 +62,7 @@ npm install express cors cross-fetch
 
 ## Step 4: Create our server
 
-Create a new file in our project directory called `server.js`. This file will contain the code for our server.
+Create a new file in our project directory called `index.js`. This file will contain the code for our server.
 
 ### Import the required packages mentioned above and use it
 
@@ -99,12 +99,12 @@ So `CORS` are basically a set of headers sent by the server to the browser. Call
 
 ```javascript
 app.get('/', (req, res) => {
-  res.json({"test":"hello instafood lovers !!! "});
+  res.json({ test: "Namaste Developer || ReactEats 🥳 !!! " });
 }
 
 ```
 
-The above code will create an API endpoint `/`, for which the request can be sent. For eg: To hit the above API, request from browser looks something like `http://localhost:3000/`. This the basic step for creating an API in node.js
+The above code will create an API endpoint `/`, for which the request can be sent. For eg: To hit the above API, request from browser looks something like `http://localhost:9000/`. This the basic step for creating an API in node.js
 It takes two params `req` which contains the request object from the browser and `res` object which is used to send response to the browser.
 
 To send response in json format , `res.json()` is used. So, when `http://localhost:3000/` is requested by browser, `{"test":"hello instafood lovers !!! "}` is sent as response.
@@ -113,9 +113,47 @@ To send response in json format , `res.json()` is used. So, when `http://localho
 
 ```javascript
 app.get("/api/restaurants", (req, res) => {
-  const { lat, lng } = req.query;
-  console.log(req.query);
-  const url = `https://www.swiggy.com/dapi/restaurants/list/v5?lat=${lat}&lng=${lng}&page_type=DESKTOP_WEB_LISTING`;
+  /* NEW SWIGGY API URL */
+  const url =
+    "https://www.swiggy.com/dapi/restaurants/list/v5?lat=28.6304203&lng=77.21772159999999&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING";
+
+  fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data);
+      res.json(data);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send("An error occurred");
+    });
+});
+```
+
+The above code will create an API endpoint `/api/restaurants`, for which the request can be sent. For eg: To hit the above API, request from browser looks something like `http://localhost:3000/api/restaurants`.
+
+Now, API call is made to fetch data from swiggy API with API url, headers. When swiggy sends response, it is first checked if the response status is ok, if ok .json() is read the json data from the incoming stream. This json data is then sent it to browser using res.json() as mentioned above. If there is any internal server error, those will be catched in catch block.
+
+Similarly, another API endpoint is created for restaurants menu `/api//restaurants/:resid`
+
+```javascript
+app.get("/api/restaurants/:resid", (req, res) => {
+  const { resid } = req.params; // Retrieve the 'resid' from the URL parameter
+
+  /* NEW SWIGGY API */
+  const url = `https://www.swiggy.com/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=28.6304203&lng=77.21772159999999&restaurantId=${resid}`;
 
   fetch(url, {
     headers: {
@@ -141,32 +179,23 @@ app.get("/api/restaurants", (req, res) => {
 });
 ```
 
-The above code will create an API endpoint `/api/restaurants`, for which the request can be sent. For eg: To hit the above API, request from browser looks something like `http://localhost:3000/api/restaurants`.
-
-query - it is the query parameter sent in the URL request.
-
-In the above code, the lat & lng value are taken for the query params and used while sending request to Swiggy API.
-
-Now, API call is made to fetch data from swiggy API with API url, headers. When swiggy sends response, it is first checked if the response status is ok, if ok .json() is read the json data from the incoming stream. This json data is then sent it to browser using res.json() as mentioned above. If there is any internal server error, those will be catched in catch block.
-
-Similarly, another API endpoint is created for `/api/menu`
-
 ### Testing API Endpoints
 
-Now that we have our Node.js server up and running, we can test it out by making a request to the `/api/restaurants` endpoint with some latitude and longitude values as query parameters. In a web browser, go to `http://localhost:3000/api/restaurants?lat=12.9351929&lng=77.62448069999999&page_type=DESKTOP_WEB_LISTING`, where lat and lng are the latitude and longitude values of the location you want to search for restaurants. You should see a JSON response with a list of restaurants in the specified location.
+Now that we have our Node.js server up and running, we can test it out by making a request to the `/api/restaurants` endpoint. You should see a JSON response with a list of restaurants in the specified location depending upon the provided url for swiggy api.
 
 ### Requesting API from React app
 
-Now that we have our server up and running, we can expose its API to a React app. In our React app, we can use the fetch API to make a GET request to `http://localhost:3000/api/restaurants` or `http://localhost:3000/api/menu` . This will retrieve the data from the Swiggy API via our Node.js server and allow you to use it in our React app.
+Now that we have our server up and running,
+we can expose its API to a React app. In our React app, we can use the fetch API to make a GET request to
+`http://localhost:3000/api/restaurants` or
+`http://localhost:3000/api/restaurants/resid` . This will retrieve the data from the Swiggy API via our Node.js server and allow you to use it in our React app.
 
 Here's an example of how you can use the fetch API to make a request to our Node.js server from a React app:
 
 - Using fetch :
 
 ```javascript
-fetch(
-  "http://localhost:3000/api/restaurants?lat=12.9351929&lng=77.62448069999999&page_type=DESKTOP_WEB_LISTING"
-)
+fetch("http://localhost:3000/api/restaurants")
   .then((response) => response.json())
   .then((data) => console.log(data))
   .catch((error) => console.error(error));
@@ -175,9 +204,7 @@ fetch(
 - Using async/await :
 
 ```javascript
-const response = await fetch(
-  `http://localhost:3000/api/restaurants?lat=12.9351929&lng=77.62448069999999&page_type=DESKTOP_WEB_LISTING`
-);
+const response = await fetch("http://localhost:3000/api/restaurants");
 
 const data = await response.json();
 ```
@@ -186,20 +213,23 @@ const data = await response.json();
 
 Once you have tested our server locally, you can deploy it to a production environment.
 
-To deploy our Node.js app on render.com, you can follow these steps:
+### Solution
 
-1. Create an account on https://render.com/ if you haven't already.
-2. Click on the `New +` button and select `Web Service` from the dropdown menu.
-3. `Connect` to the github repository (node server) which you want to deploy
-4. In the `Settings` tab, scroll down to the `Environment Variables` section and add `PORT` environment variables to `3000`.
-5. Wait for the deployment to finish. Once it's done, you should see a success message and a link to our server url.
-6. Click on the link url to test our server.
+To deploy our Node.js app on vercel.com, you can follow these steps:
 
-Note : Now that our server is deployed you can change the API url in react app to the domain in which the server is deployed. For example : if your server is hosted in `http://instafood.onrender.com`, in react app while sending request to API, use this domain name :
+1. Create an account on https://vercel.com/ if you haven't already.
+2. Click on the `Add New` button and select `Project` from the dropdown menu.
+3. `Connect` to the github repository (node server) which you want to deploy and `import` the repo
+4. Set the `name` and don't edit Root directly
+5. Set the `Environment Variables` and add `PORT` environment variables to `3000`.
+6. Wait for the deployment to finish. Once it's done, you should see a success message and a link to our server url.
+7. Click on the link url to test our server.
+
+Note : Now that our server is deployed you can change the API url in react app to the domain in which the server is deployed. For example : if your server is hosted in `https://react-eats-backend.vercel.app/`, in react app while sending request to API, use this domain name :
 
 ```javascript
 const response = await fetch(
-  `http://instafood.onrender.com/api/restaurants?lat=12.9351929&lng=77.62448069999999&page_type=DESKTOP_WEB_LISTING`
+  "https://react-eats-backend.vercel.app/api/restaurants"
 );
 
 const data = await response.json();
